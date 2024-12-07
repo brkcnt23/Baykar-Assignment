@@ -200,10 +200,15 @@ def recycle_part(request):
 
     try:
         # Belirtilen ID ile parçayı bul
-        part = Part.objects.get(id=part_id, team=employee.team)
+        part = Part.objects.get(id=part_id)
+        
+        # Kullanıcının takımı ile parçanın takımı uyumsuzsa
+        if part.team != employee.team:
+            return Response({'error': 'Sadece kendi takımınızın ürettiği parçayı geri dönüşüme yollayabilirsiniz.'}, status=status.HTTP_403_FORBIDDEN)
+
         part.delete()  # Parçayı geri dönüştür (sil)
-        return Response({'success': f'Parça başarıyla geri dönüştürüldü.'}, status=status.HTTP_200_OK)
+        return Response({'success': 'Parça başarıyla geri dönüştürüldü.'}, status=status.HTTP_200_OK)
     except Part.DoesNotExist:
-        return Response({'error': 'Belirtilen parça bulunamadı veya bu parçayı silme yetkiniz yok.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'error': 'Belirtilen parça bulunamadı.'}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return Response({'error': f'Bir hata oluştu: {str(e)}'}, status=status.HTTP_400_BAD_REQUEST)

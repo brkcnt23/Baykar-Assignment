@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     {% load static %}
     <link href="{% static 'css/tailwind.css' %}" rel="stylesheet" />
-    {% load static %}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="icon" type="image/png" href="{% static 'images/baykar_favicon.png' %}" />
     <title>Login Page</title>
   </head>
@@ -24,34 +24,78 @@
         </div>
         <button type="button" id="loginButton" class="w-full" style="background-color: #4055bd; color: white; padding: 0.75rem; border-radius: 0.5rem; font-weight: 600; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#3249a5';" onmouseout="this.style.backgroundColor='#4055bd';">Giriş Yap</button>
       </form>
-      <div id="loginError" class="mt-6 text-red-400 text-center hidden">Geçersiz kullanıcı adı veya parola.</div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="position-fixed bottom-0 end-0 p-3" style="z-index: 11; display: none;">
+      <div class="toast align-items-center text-white bg-gray-800 border-0" role="alert">
+        <div class="d-flex">
+          <div class="toast-body"></div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+      </div>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
       $(document).ready(function () {
-        $('#loginButton').click(function () {
-          const username = $('#username').val()
-          const password = $('#password').val()
+        const showNotification = (message, type) => {
+          const notification = $('#notification');
+          const toast = notification.find('.toast');
+          const toastBody = toast.find('.toast-body');
+      
+          if (type === 'success') {
+            toast.removeClass('bg-danger').addClass('bg-gray-800');
+          } else if (type === 'error') {
+            toast.removeClass('bg-gray-800').addClass('bg-danger');
+          }
+      
+          toastBody.text(message);
+          notification.show();
+          const bootstrapToast = new bootstrap.Toast(toast[0]);
+          bootstrapToast.show();
+        };
+      
+        const handleLogin = () => {
+          const username = $('#username').val();
+          const password = $('#password').val();
+      
+          if (!username || !password) {
+            showNotification('Lütfen kullanıcı adı ve parolanızı giriniz.', 'error');
+            return;
+          }
       
           $.ajax({
-            url: '/api/login', // Backend API endpoint
+            url: '/api/login',
             type: 'POST',
             contentType: 'application/json',
             data: JSON.stringify({ username: username, password: password }),
             success: function (response) {
               if (response.success) {
-                window.location.href = '/dashboard/'
+                localStorage.setItem('notificationMessage', `Giriş başarılı "${username}" olarak giriş yaptınız`);
+                localStorage.setItem('notificationType', 'success');
+                window.location.href = '/dashboard/';
               } else {
-                $('#loginError').removeClass('hidden')
+                showNotification('Giriş başarısız! Kullanıcı adı veya parola hatalı.', 'error');
               }
             },
             error: function () {
-              $('#loginError').removeClass('hidden')
-            }
-          })
-        })
-      })
+              showNotification('Giriş başarısız! Kullanıcı adı veya parola hatalı.', 'error');
+            },
+          });
+        };
+      
+        $('#loginButton').click(handleLogin);
+      
+        $('#loginForm').on('keydown', function (event) {
+          if (event.key === 'Enter') {
+            event.preventDefault();
+            handleLogin();
+          }
+        });
+      });
+      
     </script>
   </body>
 </html>
