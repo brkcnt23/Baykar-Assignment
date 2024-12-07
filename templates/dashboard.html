@@ -5,13 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {% load static %}
     <link href="{% static 'css/tailwind.css' %}" rel="stylesheet">
+    {% load static %}
+    <link rel="icon" type="image/png" href="{% static 'images/baykar_favicon.png' %}" />
     <title>Dashboard</title>
 </head>
 <body class="bg-gray-900 text-white min-h-screen flex flex-col items-center p-6">
     <header class="w-full max-w-5xl text-center mb-8">
         <h1 class="text-4xl font-bold">Hava Aracı Üretim Uygulaması - Dashboard</h1>
     </header>
-    
+
     <div class="w-full max-w-5xl">
         <!-- Aircraft Parts Section -->
         <section class="bg-gray-800 p-6 rounded-lg mb-6">
@@ -19,35 +21,58 @@
             <table class="table-auto w-full">
                 <thead>
                     <tr class="bg-gray-700">
-                        <th class="px-4 py-2">Parça Adı</th>
-                        <th class="px-4 py-2">Miktar</th>
+                        <th class="px-4 py-2 text-white">Parça Adı</th>
+                        <th class="px-4 py-2 text-white">Hedef Uçak Tipi</th>
+                        <th class="px-4 py-2 text-white">Kullanıldı Mı?</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for part in parts %}
                     <tr class="bg-gray-600 border-b border-gray-700">
-                        <td class="px-4 py-3">{{ part.name }}</td>
-                        <td class="px-4 py-3">{{ part.quantity }}</td>
+                        <td class="px-4 py-3 text-white">{{ part.get_part_type_display }}</td>
+                        <td class="px-4 py-3 text-white">{{ part.get_target_aircraft_type_display }}</td>
+                        <td class="px-4 py-3 text-white">{{ part.used|yesno:"Evet,Hayır" }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </section>
 
-        <!-- Aircrafts Section -->
+        <!-- Produce Part Section -->
+        {% if can_produce %}
+        <section class="bg-gray-800 p-6 rounded-lg mb-6">
+            <h2 class="text-3xl font-semibold text-center mb-4">Yeni Parça Üret</h2>
+            <form id="producePartForm" class="space-y-6">
+                <div>
+                    <label for="aircraftType" class="block text-lg font-medium text-white">Hedef Uçak Tipi</label>
+                    <select id="aircraftType" name="aircraft_type" class="mt-2 w-full px-4 py-3 border border-gray-400 rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent" required>
+                        <option value="">Bir uçak tipi seçin</option>
+                        {% for key, value in aircraft_type_choices %}
+                        <option value="{{ key }}">{{ value }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="button" id="producePartButton" class="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition duration-200 focus:outline-none focus:ring-4 focus:ring-indigo-400 focus:ring-opacity-50">Üretim Yap</button>
+            </form>
+            <div id="producePartError" class="mt-4 text-red-400 text-center hidden">Parça üretilemedi.</div>
+            <div id="producePartSuccess" class="mt-4 text-green-400 text-center hidden">Parça başarıyla üretildi!</div>
+        </section>
+        {% endif %}
+
+        <!-- Aircrafts Section (only for montaj team) -->
         {% if aircrafts %}
         <section class="bg-gray-800 p-6 rounded-lg">
             <h2 class="text-3xl font-semibold text-center mb-4">Hava Araçları</h2>
             <table class="table-auto w-full">
                 <thead>
                     <tr class="bg-gray-700">
-                        <th class="px-4 py-2">Hava Aracı Adı</th>
+                        <th class="px-4 py-2 text-white">Hava Aracı Adı</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for aircraft in aircrafts %}
                     <tr class="bg-gray-600 border-b border-gray-700">
-                        <td class="px-4 py-3">{{ aircraft.name }}</td>
+                        <td class="px-4 py-3 text-white">{{ aircraft.get_aircraft_type_display }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -59,5 +84,92 @@
     <footer class="mt-auto text-gray-500">
         <p>Hava Aracı Üretim Uygulaması - 2024</p>
     </footer>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+      $(document).ready(function () {
+        const csrftoken = '{{ csrf_token }}';
+
+        $('#producePartButton').click(function () {
+          const aircraftType = $('#aircraftType').val();
+
+          if (!aircraftType) {
+            $('#producePartError').removeClass('hidden').text('Bir uçak tipi seçin.');
+            return;
+          }
+
+          $.ajax({
+            url: '/api/produce-part/',
+            type: 'POST',
+            contentType: 'application/json',
+            headers: {
+              'X-CSRFToken': csrftoken
+            },
+            data: JSON.stringify({ target_aircraft_type: aircraftType }),
+            success: function (response) {
+              if (response.success) {
+                $('#producePartSuccess').removeClass('hidden').text('Parça başarıyla üretildi!');
+                $('#producePartError').addClass('hidden');
+
+                // Yeni üretilen parçayı tabloya ekle
+                const newRow = `
+                  <tr class="bg-gray-600 border-b border-gray-700">
+                    <td class="px-4 py-3 text-white">${response.part_type_display || 'Belirtilmedi'}</td>
+                    <td class="px-4 py-3 text-white">${response.target_aircraft_type_display || 'Belirtilmedi'}</td>
+                    <td class="px-4 py-3 text-white">${response.used_display || 'Hayır'}</td>
+                  </tr>`;
+                $('table tbody').append(newRow);
+              } else {
+                $('#producePartError').removeClass('hidden').text(response.error);
+                $('#producePartSuccess').addClass('hidden');
+              }
+            },
+            error: function () {
+              $('#producePartError').removeClass('hidden').text('Bir hata oluştu.');
+              $('#producePartSuccess').addClass('hidden');
+            }
+          });
+        });
+      });
+    </script>
 </body>
 </html>
+<style>
+    select {
+        color: white; /* Yazı rengi beyaz */
+        background-color: #071f45; /* Arka plan rengi */
+        border: 1px solid #4055bd; /* İsteğe bağlı: kenar rengi */
+        padding: 5px; /* İsteğe bağlı: kutu içi boşluk */
+        border-radius: 5px; /* İsteğe bağlı: köşeleri yuvarlatma */
+    }
+
+    option {
+        color: white; /* Yazı rengi beyaz */
+        background-color: #071f45; /* Seçenek arka plan rengi */
+    }
+    table {
+        width: 100%; /* Tabloyu tam genişlikte yapar */
+        border-collapse: collapse; /* Kenarların birleşmesini sağlar */
+    }
+
+    th, td {
+        text-align: center; /* Hücreleri ortalar */
+        padding: 12px; /* Hücre içi boşluk */
+        border: 1px solid #4055bd; /* Hücrelerin kenarlarına renk ekler */
+    }
+
+    th {
+        background-color: #4055bd; /* Başlık arka plan rengi */
+        color: white; /* Başlık yazı rengi */
+        font-weight: bold; /* Başlık yazı tipi kalın */
+    }
+
+    td {
+        background-color: #1e293b; /* Hücre arka plan rengi */
+        color: white; /* Hücre yazı rengi */
+    }
+
+    tr:nth-child(even) td {
+        background-color: #334155; /* Alternatif satır arka plan rengi */
+    }
+</style>

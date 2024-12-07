@@ -17,6 +17,7 @@ from core.views import (
     login_user,
     login_page,
     dashboard,
+    produce_part,
 )
 
 
@@ -33,4 +34,5 @@ urlpatterns = [
     path('login/', login_page, name='login'),  # Login sayfası için
     path('api/login', login_user, name='api_login'),  # Login işlemi için
     path('dashboard/', dashboard, name='dashboard'),  # Dashboard için
+    path('api/produce-part/', produce_part, name='produce_part'),
 ]
