@@ -247,3 +247,28 @@ django-filter==24.3
       src="/static/images/kullanilmis-parca-guncellemesi.png"
 </h1>
 
+* Veritabanı Yönetimi
+<h1 align="center">
+    <img
+      height="700"
+      width="800"
+      src="/static/images/django-personel.png"
+</h1>
+<h1 align="center">
+    <img
+      height="700"
+      width="800"
+      src="/static/images/django-takimlar.png"
+</h1>
+<h1 align="center">
+    <img
+      height="800"
+      width="1000"
+      src="/static/images/django-parcalar.png"
+</h1>
+<h1 align="center">
+    <img
+      height="500"
+      width="800"
+      src="/static/images/django-havaaraclari.png"
+</h1>
