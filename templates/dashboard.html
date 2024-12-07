@@ -108,6 +108,42 @@
         </section>
       {% endif %}
 
+      {% if employee.team.team_type == 'MONTAJ_TAKIMI' %}
+        <section id="readyAircraftSection" class="bg-gray-800 p-6 rounded-lg mb-6">
+          <h2 class="text-3xl font-semibold text-center mb-4">Üretime Hazır Uçaklar</h2>
+          <table class="table table-dark table-striped table-hover">
+            <thead>
+              <tr>
+                <th>Uçak Tipi</th>
+                <th>Gerekli Parçalar</th>
+                <th>Üretim İçin Uygun Parça Sayısı</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for aircraft_type, parts_info in ready_aircrafts.items %}
+                <tr>
+                  <td>{{ aircraft_type }}</td>
+                  <td>
+                    {% for part_type, count_needed in parts_info.required_parts.items %}
+                      <p>{{ part_type }}: {{ count_needed }} adet</p>
+                    {% endfor %}
+                  </td>
+                  <td>
+                    {% for part_type, count_available in parts_info.available_parts.items %}
+                      <p>{{ part_type }}: {{ count_available }} adet</p>
+                    {% endfor %}
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="3" class="text-center">Üretime hazır uçak bulunmamaktadır.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </section>
+      {% endif %}
+
       <!-- Yeni Parça Üret Kısmı -->
       {% if not employee.team.team_type == 'MONTAJ_TAKIMI' and can_produce %}
         <section class="bg-gray-800 p-6 rounded-lg mb-6">
@@ -208,13 +244,13 @@
       $(document).ready(function () {
         const csrftoken = '{{ csrf_token }}'
         let deletePartId = null // Silinecek parçanın ID'si için global değişken
-        const notificationMessage = localStorage.getItem('notificationMessage');
-        const notificationType = localStorage.getItem('notificationType');
+        const notificationMessage = localStorage.getItem('notificationMessage')
+        const notificationType = localStorage.getItem('notificationType')
         if (notificationMessage && notificationType) {
-          showNotification(notificationMessage, notificationType);
+          showNotification(notificationMessage, notificationType)
           // Notification gösterildikten sonra localStorage'dan temizle
-          localStorage.removeItem('notificationMessage');
-          localStorage.removeItem('notificationType');
+          localStorage.removeItem('notificationMessage')
+          localStorage.removeItem('notificationType')
         }
         // Parça Üretme
         $('#producePartButton').click(function () {
@@ -324,24 +360,24 @@
       
         // Notification Gösterme
         function showNotification(message, type) {
-          const notification = $('#notification');
-          const toastElement = notification.find('.toast');
-    
+          const notification = $('#notification')
+          const toastElement = notification.find('.toast')
+      
           if (type === 'success') {
-            toastElement.removeClass('bg-danger').addClass('bg-success');
+            toastElement.removeClass('bg-danger').addClass('bg-success')
           } else {
-            toastElement.removeClass('bg-success').addClass('bg-danger');
+            toastElement.removeClass('bg-success').addClass('bg-danger')
           }
-    
-          notification.find('.toast-body').text(message);
-          notification.show();
-    
-          const toast = new bootstrap.Toast(toastElement[0]);
-          toast.show();
-    
+      
+          notification.find('.toast-body').text(message)
+          notification.show()
+      
+          const toast = new bootstrap.Toast(toastElement[0])
+          toast.show()
+      
           setTimeout(() => {
-            notification.hide();
-          }, 3000);
+            notification.hide()
+          }, 3000)
         }
       })
     </script>

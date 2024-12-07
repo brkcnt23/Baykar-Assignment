@@ -72,6 +72,7 @@ def dashboard(request):
     employee = getattr(user, 'employee', None)
     can_produce = False
     team_info = None
+    ready_aircrafts = {}
 
     if employee:
         team = employee.team
@@ -81,6 +82,35 @@ def dashboard(request):
                 parts = Part.objects.select_related('team').all()
                 aircrafts = Aircraft.objects.all()
                 can_produce = True
+
+                # Üretime hazır uçaklar verisini oluşturma
+                required_parts = {
+                    "KANAT": 2,
+                    "GOVDE": 1,
+                    "KUYRUK": 1,
+                    "AVIYONIK": 1,
+                }
+                for aircraft_type, _ in AIRCRAFT_TYPE_CHOICES:
+                    available_parts = {part_type: 0 for part_type in required_parts}
+                    for part_type in required_parts:
+                        count = parts.filter(
+                            part_type=part_type,
+                            target_aircraft_type=aircraft_type,
+                            used=False,
+                            aircraft__isnull=True,
+                        ).count()
+                        available_parts[part_type] = count
+
+                    # Eğer tüm parçalar yeterliyse listeye ekle
+                    if all(
+                        available_parts[part_type] >= count_needed
+                        for part_type, count_needed in required_parts.items()
+                    ):
+                        ready_aircrafts[aircraft_type] = {
+                            "required_parts": required_parts,
+                            "available_parts": available_parts,
+                        }
+
             else:
                 parts = Part.objects.select_related('team').filter(
                     part_type=team.team_type.replace('_TAKIMI', '')
@@ -102,6 +132,7 @@ def dashboard(request):
         'can_produce': can_produce,
         'aircraft_type_choices': AIRCRAFT_TYPE_CHOICES,
         'team_info': team_info if team_info else "Takımsız",
+        'ready_aircrafts': ready_aircrafts,  # Üretime hazır uçaklar
     }
 
     return render(request, 'dashboard.html', context)
