@@ -153,3 +153,96 @@ django-filter==24.3
       src="/static/images/aircraft-logo.png"
       alt="AI-Generated Logo">
 </h1>
+
+* Giriş Ekranı
+<h1 align="center">
+    <img
+      height="500"
+      width="500"
+      src="/static/images/Login-screen.png"
+</h1>
+
+* Giriş Bildirimi
+<h1 align="center">
+    <img
+      height="500"
+      width="500"
+      src="/static/images/Giris-bildirimi.png"
+</h1>
+
+* `Parça` Üretimi
+    Hedef `Hava Aracı` seçilir ve `Parça`  üretilir.
+<h1 align="center">
+    <img
+      height="500"
+      width="500"
+      src="/static/images/parca-uretimi.png"
+</h1>
+
+* `Parça` Silme Paneli
+<h1 align="center">
+    <img
+      height="500"
+      width="500"
+      src="/static/images/parca-silme-paneli.png"
+</h1>
+
+* `Parça` Geri Dönüşümü
+    `6:52`'de oluşturulan `Akıncı` için üretilmiş `KUYRUK` silindi.
+<h1 align="center">
+    <img
+      height="500"
+      width="500"
+      src="/static/images/parca-geridonusumu.png"
+</h1>
+
+* `Takım` içerisindeki `Parça` işlemleri izin kontrolleri
+    Sadece kendi takımının ürettiği `Parça`yı silebilir ve kullanılmış `Parça`ları silemez.
+<h1 align="center">
+    <img
+      height="500"
+      width="500"
+      src="/static/images/takim-izin-kontrolu.png"
+</h1>
+
+* Montaj Personeli Ekranı
+    Kullanılmış ve Kullanılmamış `Parça`ların ayrı listeleri
+<h1 align="center">
+    <img
+      height="500"
+      width="500"
+      src="/static/images/montaj-personeli-ekrani.png"
+</h1>
+
+  * `Parça`ları tam ve üretime hazır olan Hava Aracı listesi
+<h1 align="center">
+    <img
+      height="500"
+      width="500"
+      src="/static/images/montaj-personeli-ekrani2.png"
+</h1>
+
+* Eksik `Parça` Bildirimi
+<h1 align="center">
+    <img
+      height="500"
+      width="500"
+      src="/static/images/eksik-parca-bildirimi.png"
+</h1>
+
+* Üretim sonrası `Hava Aracı` listeleri güncellemesi
+<h1 align="center">
+    <img
+      height="500"
+      width="500"
+      src="/static/images/uretim-sonrasi-montaj.png"
+</h1>
+
+* Üretim sonrası `Parça` listeleri
+<h1 align="center">
+    <img
+      height="500"
+      width="500"
+      src="/static/images/kullanilmis-parca-guncellemesi.png"
+</h1>
+
