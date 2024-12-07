@@ -158,7 +158,7 @@ django-filter==24.3
 <h1 align="center">
     <img
       height="500"
-      width="500"
+      width="800"
       src="/static/images/Login-screen.png"
 </h1>
 
@@ -166,7 +166,7 @@ django-filter==24.3
 <h1 align="center">
     <img
       height="500"
-      width="500"
+      width="800"
       src="/static/images/Giris-bildirimi.png"
 </h1>
 
@@ -175,15 +175,15 @@ django-filter==24.3
 <h1 align="center">
     <img
       height="500"
-      width="500"
+      width="800"
       src="/static/images/parca-uretimi.png"
 </h1>
 
 * `Parça` Silme Paneli
 <h1 align="center">
     <img
-      height="500"
-      width="500"
+      height="600"
+      width="600"
       src="/static/images/parca-silme-paneli.png"
 </h1>
 
@@ -191,8 +191,8 @@ django-filter==24.3
     `6:52`'de oluşturulan `Akıncı` için üretilmiş `KUYRUK` silindi.
 <h1 align="center">
     <img
-      height="500"
-      width="500"
+      height="600"
+      width="800"
       src="/static/images/parca-geridonusumu.png"
 </h1>
 
@@ -218,7 +218,7 @@ django-filter==24.3
 <h1 align="center">
     <img
       height="500"
-      width="500"
+      width="800"
       src="/static/images/montaj-personeli-ekrani2.png"
 </h1>
 
@@ -226,7 +226,7 @@ django-filter==24.3
 <h1 align="center">
     <img
       height="500"
-      width="500"
+      width="800"
       src="/static/images/eksik-parca-bildirimi.png"
 </h1>
 
@@ -239,6 +239,7 @@ django-filter==24.3
 </h1>
 
 * Üretim sonrası `Parça` listeleri
+    Üretimde kullanılan `Parça`lar kullnılanlar listesinde görüntülenir
 <h1 align="center">
     <img
       height="500"
