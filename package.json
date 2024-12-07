@@ -1,0 +1,17 @@
+{
+  "name": "baykar-assignment",
+  "version": "1.0.0",
+  "description": "Baykar assignment project",
+  "main": "index.js",
+  "scripts": {
+    "build": "npx tailwindcss -i ./static/css/input.css -o ./static/css/tailwind.css --watch"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "tailwindcss": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=18.17.1",
+    "npm": ">=9.6.7"
+  }
+}

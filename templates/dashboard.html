@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% load static %}
+    <link href="{% static 'css/tailwind.css' %}" rel="stylesheet">
+    <title>Dashboard</title>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center p-6">
+    <header class="w-full max-w-5xl text-center mb-8">
+        <h1 class="text-4xl font-bold">Hava Aracı Üretim Uygulaması - Dashboard</h1>
+    </header>
+    
+    <div class="w-full max-w-5xl">
+        <!-- Aircraft Parts Section -->
+        <section class="bg-gray-800 p-6 rounded-lg mb-6">
+            <h2 class="text-3xl font-semibold text-center mb-4">Parçalar</h2>
+            <table class="table-auto w-full">
+                <thead>
+                    <tr class="bg-gray-700">
+                        <th class="px-4 py-2">Parça Adı</th>
+                        <th class="px-4 py-2">Miktar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for part in parts %}
+                    <tr class="bg-gray-600 border-b border-gray-700">
+                        <td class="px-4 py-3">{{ part.name }}</td>
+                        <td class="px-4 py-3">{{ part.quantity }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+
+        <!-- Aircrafts Section -->
+        {% if aircrafts %}
+        <section class="bg-gray-800 p-6 rounded-lg">
+            <h2 class="text-3xl font-semibold text-center mb-4">Hava Araçları</h2>
+            <table class="table-auto w-full">
+                <thead>
+                    <tr class="bg-gray-700">
+                        <th class="px-4 py-2">Hava Aracı Adı</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for aircraft in aircrafts %}
+                    <tr class="bg-gray-600 border-b border-gray-700">
+                        <td class="px-4 py-3">{{ aircraft.name }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+        {% endif %}
+    </div>
+
+    <footer class="mt-auto text-gray-500">
+        <p>Hava Aracı Üretim Uygulaması - 2024</p>
+    </footer>
+</body>
+</html>

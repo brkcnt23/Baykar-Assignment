@@ -1,22 +1,36 @@
-"""
-URL configuration for aircraft_app project.
 
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.1/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from core.views import (
+    PartViewSet as CorePartViewSet,
+    TeamViewSet as CoreTeamViewSet,
+    EmployeeViewSet as CoreEmployeeViewSet,
+    AircraftViewSet as CoreAircraftViewSet
+)
+from core.views import (
+    PartViewSet,
+    TeamViewSet,
+    EmployeeViewSet,
+    AircraftViewSet,
+    login_user,
+    login_page,
+    dashboard,
+)
+
+
+
+router = DefaultRouter()
+router.register(r'parts', PartViewSet)
+router.register(r'teams', TeamViewSet)
+router.register(r'employee', EmployeeViewSet)
+router.register(r'aircraft', AircraftViewSet)
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('admin/', admin.site.urls),  # Admin paneline erişmek için bu satırı ekleyin
+    path('', include(router.urls)),
+    path('login/', login_page, name='login'),  # Login sayfası için
+    path('api/login', login_user, name='api_login'),  # Login işlemi için
+    path('dashboard/', dashboard, name='dashboard'),  # Dashboard için
 ]
