@@ -1,6 +1,5 @@
 
 from django.contrib import admin
-from django.urls import path
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from core.views import (
@@ -18,6 +17,7 @@ from core.views import (
     login_page,
     dashboard,
     produce_part,
+    recycle_part,
 )
 
 
@@ -28,6 +28,7 @@ router.register(r'teams', TeamViewSet)
 router.register(r'employee', EmployeeViewSet)
 router.register(r'aircraft', AircraftViewSet)
 
+
 urlpatterns = [
     path('admin/', admin.site.urls),  # Admin paneline erişmek için bu satırı ekleyin
     path('', include(router.urls)),
@@ -35,4 +36,5 @@ urlpatterns = [
     path('api/login', login_user, name='api_login'),  # Login işlemi için
     path('dashboard/', dashboard, name='dashboard'),  # Dashboard için
     path('api/produce-part/', produce_part, name='produce_part'),
+    path('api/recycle-part/', recycle_part, name='recycle_part'),
 ]

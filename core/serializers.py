@@ -19,7 +19,7 @@ class AircraftSerializer(serializers.ModelSerializer):
         fields = ['id', 'aircraft_type', 'production_time']
 
 class PartSerializer(serializers.ModelSerializer):
-    team_name = serializers.CharField(source='team.name', read_only=True)
+    team_name = serializers.CharField(source='team.name', read_only=True) 
 
     class Meta:
         model = Part
