@@ -44,28 +44,28 @@
           const notification = $('#notification');
           const toast = notification.find('.toast');
           const toastBody = toast.find('.toast-body');
-      
+    
           if (type === 'success') {
             toast.removeClass('bg-danger').addClass('bg-gray-800');
           } else if (type === 'error') {
             toast.removeClass('bg-gray-800').addClass('bg-danger');
           }
-      
+    
           toastBody.text(message);
           notification.show();
           const bootstrapToast = new bootstrap.Toast(toast[0]);
           bootstrapToast.show();
         };
-      
+    
         const handleLogin = () => {
           const username = $('#username').val();
           const password = $('#password').val();
-      
+    
           if (!username || !password) {
             showNotification('Lütfen kullanıcı adı ve parolanızı giriniz.', 'error');
             return;
           }
-      
+    
           $.ajax({
             url: '/api/login',
             type: 'POST',
@@ -73,7 +73,11 @@
             data: JSON.stringify({ username: username, password: password }),
             success: function (response) {
               if (response.success) {
-                localStorage.setItem('notificationMessage', `Giriş başarılı "${username}" olarak giriş yaptınız`);
+                // Notification'ı localStorage'a kaydediyoruz
+                localStorage.setItem(
+                  'notificationMessage',
+                  `Giriş başarılı! "${username}" olarak giriş yaptınız.`
+                );
                 localStorage.setItem('notificationType', 'success');
                 window.location.href = '/dashboard/';
               } else {
@@ -85,9 +89,9 @@
             },
           });
         };
-      
+    
         $('#loginButton').click(handleLogin);
-      
+    
         $('#loginForm').on('keydown', function (event) {
           if (event.key === 'Enter') {
             event.preventDefault();
@@ -95,7 +99,7 @@
           }
         });
       });
-      
     </script>
+    
   </body>
 </html>

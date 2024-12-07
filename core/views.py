@@ -33,42 +33,17 @@ class EmployeeViewSet(viewsets.ModelViewSet):
     serializer_class = EmployeeSerializer
 
 
-@extend_schema(description="Uçak üretimi için Montaj takımı gerekli.")
 class AircraftViewSet(viewsets.ModelViewSet):
     queryset = Aircraft.objects.all()
     serializer_class = AircraftSerializer
+    permission_classes = [IsMontajTeam]
 
-    @extend_schema(
-        request={
-            'application/json': {
-                'aircraft_type': 'str'
-            }
-        },
-        responses={201: 'Uçak üretildi',
-                   400: 'Eksik parça veya geçersiz uçak tipi'},
-        description="Belirtilen uçak tipinin parçalarını monte eder."
-    )
-    @action(methods=['post'], detail=False, url_path='montaj', permission_classes=[IsMontajTeam])
-    def montaj(self, request):
-        aircraft_type = request.data.get('aircraft_type')
-        if aircraft_type not in ['TB2', 'TB3', 'AKINCI', 'KIZILELMA']:
-            return Response({"error": "Geçersiz uçak tipi"}, status=status.HTTP_400_BAD_REQUEST)
-
-        required_parts = ['KANAT', 'GOVDE', 'KUYRUK', 'AVIYONIK']
-        for p_type in required_parts:
-            if not Part.objects.filter(part_type=p_type, used=False, aircraft__isnull=True).exists():
-                return Response({"error": f"{p_type} tipi parça eksik."}, status=status.HTTP_400_BAD_REQUEST)
-
-        new_aircraft = Aircraft.objects.create(aircraft_type=aircraft_type)
-
-        for p_type in required_parts:
-            part = Part.objects.filter(
-                part_type=p_type, used=False, aircraft__isnull=True).first()
-            part.aircraft = new_aircraft
-            part.used = True
-            part.save()
-
-        return Response({"success": f"{new_aircraft.get_aircraft_type_display()} uçağı başarıyla üretildi!"}, status=status.HTTP_201_CREATED)
+    @extend_schema(description="Üretilen uçakların listesini getir.")
+    @action(methods=['get'], detail=False, url_path='list', permission_classes=[IsMontajTeam])
+    def list_aircrafts(self, request):
+        aircrafts = Aircraft.objects.all()
+        serializer = self.get_serializer(aircrafts, many=True)
+        return Response(serializer.data)
 
 
 class PartViewSet(viewsets.ModelViewSet):
@@ -101,19 +76,16 @@ def dashboard(request):
     if employee:
         team = employee.team
         if team:
-            team_info = team.name  # Kullanıcının takım adı
+            team_info = team.name
             if team.team_type == 'MONTAJ_TAKIMI':
-                # Montajcı tüm parçaları ve uçakları görebilmeli
                 parts = Part.objects.select_related('team').all()
                 aircrafts = Aircraft.objects.all()
+                can_produce = True
             else:
-                # Diğer personel sadece kendi türüne ait parçaları görmeli
                 parts = Part.objects.select_related('team').filter(
                     part_type=team.team_type.replace('_TAKIMI', '')
                 )
                 aircrafts = None
-
-                # Eğer takım parça üretimi yapabilen bir takım ise can_produce True olmalı
                 if team.team_type in ['KANAT_TAKIMI', 'GOVDE_TAKIMI', 'KUYRUK_TAKIMI', 'AVIYONIK_TAKIMI']:
                     can_produce = True
         else:
@@ -129,11 +101,10 @@ def dashboard(request):
         'employee': employee,
         'can_produce': can_produce,
         'aircraft_type_choices': AIRCRAFT_TYPE_CHOICES,
-        'team_info': team_info if team_info else "Takımsız",  # Takım adı context'e eklendi
+        'team_info': team_info if team_info else "Takımsız",
     }
 
     return render(request, 'dashboard.html', context)
-
 
 
 @csrf_exempt
@@ -181,9 +152,65 @@ def produce_part(request):
         'part_type_display': part.get_part_type_display(),
         'target_aircraft_type_display': part.get_target_aircraft_type_display(),
         'team_name': part.team.name,
-        'production_time': part.production_time.strftime('%Y-%m-%d %H:%M:%S'),  # Tarih formatı
+        # Tarih formatı
+        'production_time': part.production_time.strftime('%Y-%m-%d %H:%M:%S'),
         'id': part.id
     }, status=status.HTTP_201_CREATED)
+
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def produce_aircraft(request):
+    employee = getattr(request.user, 'employee', None)
+    if not employee or not employee.team or employee.team.team_type != 'MONTAJ_TAKIMI':
+        return Response({'error': 'Sadece Montaj Takımı uçak üretebilir.'}, status=status.HTTP_403_FORBIDDEN)
+
+    aircraft_type = request.data.get('aircraft_type')
+
+    if not aircraft_type or aircraft_type not in [choice[0] for choice in AIRCRAFT_TYPE_CHOICES]:
+        return Response({'error': 'Geçersiz uçak tipi.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    required_parts = ['KANAT', 'GOVDE', 'KUYRUK', 'AVIYONIK']
+    missing_parts = []
+
+    for part_type in required_parts:
+        count_needed = 2 if part_type == 'KANAT' else 1
+        available_parts = Part.objects.filter(
+            part_type=part_type,
+            target_aircraft_type=aircraft_type,
+            used=False,
+            aircraft__isnull=True
+        ).count()
+
+        if available_parts < count_needed:
+            missing_parts.append(
+                f"{count_needed - available_parts} adet {part_type}")
+
+    if missing_parts:
+        return Response({'error': f'Eksik parçalar: {", ".join(missing_parts)}'}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        # Montaj takımını kaydet
+        new_aircraft = Aircraft.objects.create(aircraft_type=aircraft_type, produced_by=employee.team)
+
+        for part_type in required_parts:
+            count_needed = 2 if part_type == 'KANAT' else 1
+            parts = Part.objects.filter(
+                part_type=part_type,
+                target_aircraft_type=aircraft_type,
+                used=False,
+                aircraft__isnull=True
+            )[:count_needed]
+
+            for part in parts:
+                part.aircraft = new_aircraft
+                part.used = True
+                part.save()
+
+        return Response({'success': f'{new_aircraft.get_aircraft_type_display()} uçağı başarıyla üretildi!'}, status=status.HTTP_201_CREATED)
+    except Exception as e:
+        return Response({'error': f'Uçak üretiminde bir hata oluştu: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['POST'])
@@ -201,7 +228,7 @@ def recycle_part(request):
     try:
         # Belirtilen ID ile parçayı bul
         part = Part.objects.get(id=part_id)
-        
+
         # Kullanıcının takımı ile parçanın takımı uyumsuzsa
         if part.team != employee.team:
             return Response({'error': 'Sadece kendi takımınızın ürettiği parçayı geri dönüşüme yollayabilirsiniz.'}, status=status.HTTP_403_FORBIDDEN)

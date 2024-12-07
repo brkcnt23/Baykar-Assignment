@@ -40,6 +40,7 @@ class Employee(models.Model):
 class Aircraft(models.Model):
     aircraft_type = models.CharField(max_length=50, choices=AIRCRAFT_TYPE_CHOICES)
     production_time = models.DateTimeField(auto_now_add=True)
+    produced_by = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True, blank=True, related_name='produced_aircrafts')
 
     def __str__(self):
         return f"{self.get_aircraft_type_display()} - {self.id}"

@@ -14,45 +14,108 @@
       <h1 class="text-4xl font-bold">Hava Aracı Üretim Uygulaması</h1>
       <h3 class="text-2xl font-bold">Takımınız: {{ team_info }}</h3>
     </header>
-
     <div class="w-full max-w-5xl">
-      <section class="bg-gray-800 p-6 rounded-lg mb-6">
-        <h2 class="text-3xl font-semibold text-center mb-4">Parçalar</h2>
-        <table class="table table-dark table-striped table-hover">
-          <thead>
-            <tr>
-              <th>Parça Adı</th>
-              <th>Hedef Uçak Tipi</th>
-              <th>Kullanıldı Mı?</th>
-              <th>Üreten Takım</th>
-              <th>Üretim Zamanı</th>
-              <th>İşlemler</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for part in parts %}
-              <tr id="part-{{ part.id }}">
-                <td>{{ part.get_part_type_display }}</td>
-                <td>{{ part.get_target_aircraft_type_display }}</td>
-                <td>{{ part.used|yesno:'Evet,Hayır' }}</td>
-                <td>{{ part.team.name }}</td>
-                <td>{{ part.production_time }}</td>
-                <td>
-                  <button class="btn btn-danger" onclick="deletePart({{ part.id }})">Sil</button>
-                </td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </section>
+      {% if employee.team.team_type == 'MONTAJ_TAKIMI' %}
+        <section id="partsSection" class="bg-gray-800 p-6 rounded-lg mb-6">
+          <h2 class="text-3xl font-semibold text-center mb-4">Montaj Personeli Görüntüsü</h2>
+          <div class="row">
+            <!-- Montaja Hazır Parçalar -->
+            <div class="col-md-6">
+              <h3 class="text-2xl font-semibold text-center mb-4">Montaja Hazır Parçalar</h3>
+              <table class="table table-dark table-striped table-hover">
+                <thead>
+                  <tr>
+                    <th>Parça Adı</th>
+                    <th>Hedef Uçak Tipi</th>
+                    <th>Üreten Takım</th>
+                    <th>Üretim Zamanı</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for part in parts %}
+                    {% if not part.used %}
+                      <tr>
+                        <td>{{ part.get_part_type_display }}</td>
+                        <td>{{ part.get_target_aircraft_type_display }}</td>
+                        <td>{{ part.team.name }}</td>
+                        <td>{{ part.production_time }}</td>
+                      </tr>
+                    {% endif %}
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
 
-      {% if can_produce %}
+            <!-- Kullanılmış Parçalar -->
+            <div class="col-md-6">
+              <h3 class="text-2xl font-semibold text-center mb-4">Kullanılmış Parçalar</h3>
+              <table class="table table-dark table-striped table-hover">
+                <thead>
+                  <tr>
+                    <th>Parça Adı</th>
+                    <th>Hedef Uçak Tipi</th>
+                    <th>Üreten Takım</th>
+                    <th>Üretim Zamanı</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for part in parts %}
+                    {% if part.used %}
+                      <tr>
+                        <td>{{ part.get_part_type_display }}</td>
+                        <td>{{ part.get_target_aircraft_type_display }}</td>
+                        <td>{{ part.team.name }}</td>
+                        <td>{{ part.production_time }}</td>
+                      </tr>
+                    {% endif %}
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      {% else %}
+        <section id="partsSection" class="bg-gray-800 p-6 rounded-lg mb-6">
+          <h2 class="text-3xl font-semibold text-center mb-4">Parçalar</h2>
+          <table class="table table-dark table-striped table-hover">
+            <thead>
+              <tr>
+                <th>Parça Adı</th>
+                <th>Hedef Uçak Tipi</th>
+                <th>Kullanıldı Mı?</th>
+                <th>Üreten Takım</th>
+                <th>Üretim Zamanı</th>
+                <th>İşlemler</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for part in parts %}
+                <tr id="part-{{ part.id }}">
+                  <td>{{ part.get_part_type_display }}</td>
+                  <td>{{ part.get_target_aircraft_type_display }}</td>
+                  <td>{{ part.used|yesno:'Evet,Hayır' }}</td>
+                  <td>{{ part.team.name }}</td>
+                  <td>{{ part.production_time }}</td>
+                  <td>
+                    {% if employee.team.id == part.team.id and not part.used %}
+                      <button class="btn btn-danger" onclick="deletePart({{ part.id }})">Sil</button>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </section>
+      {% endif %}
+
+      <!-- Yeni Parça Üret Kısmı -->
+      {% if not employee.team.team_type == 'MONTAJ_TAKIMI' and can_produce %}
         <section class="bg-gray-800 p-6 rounded-lg mb-6">
           <h2 class="text-3xl font-semibold text-center mb-4">Yeni Parça Üret</h2>
           <form id="producePartForm" class="space-y-6">
             <div>
-              <label for="aircraftType" class="block text-lg font-medium text-white">Hedef Uçak Tipi</label>
-              <select id="aircraftType" name="aircraft_type" class="form-select" required>
+              <label for="partAircraftType" class="block text-lg font-medium text-white">Hedef Uçak Tipi</label>
+              <select id="partAircraftType" name="aircraft_type" class="form-select" required>
                 <option value="">Bir uçak tipi seçin</option>
                 {% for key, value in aircraft_type_choices %}
                   <option value="{{ key }}">{{ value }}</option>
@@ -64,180 +127,224 @@
         </section>
       {% endif %}
 
+      <!-- Yeni Uçak Üret Kısmı -->
+      {% if employee.team.team_type == 'MONTAJ_TAKIMI' %}
+        <section class="bg-gray-800 p-6 rounded-lg mb-6">
+          <h2 class="text-3xl font-semibold text-center mb-4">Yeni Uçak Üret</h2>
+          <form id="produceAircraftForm" class="space-y-6">
+            <div>
+              <label for="aircraftType" class="block text-lg font-medium text-white">Hedef Uçak Tipi</label>
+              <select id="aircraftType" name="aircraft_type" class="form-select" required>
+                <option value="">Bir uçak tipi seçin</option>
+                {% for key, value in aircraft_type_choices %}
+                  <option value="{{ key }}">{{ value }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <button type="button" id="produceAircraftButton" class="btn btn-primary w-100">Üretim Yap</button>
+          </form>
+        </section>
+
+        <!-- Üretilen Uçaklar Listesi -->
+        <section id="aircraftsSection" class="bg-gray-800 p-6 rounded-lg mb-6">
+          <h2 class="text-3xl font-semibold text-center mb-4">Üretilen Uçaklar</h2>
+          <table class="table table-dark table-striped table-hover">
+            <thead>
+              <tr>
+                <th>Uçak Tipi</th>
+                <th>Üretim Tarihi</th>
+                <th>Montaj Takımı</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for aircraft in aircrafts %}
+                <tr>
+                  <td>{{ aircraft.get_aircraft_type_display }}</td>
+                  <td>{{ aircraft.production_time }}</td>
+                  <td>{{ aircraft.produced_by }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </section>
+      {% endif %}
     </div>
 
     <footer class="mt-auto text-gray-500">
       <p>Hava Aracı Üretim Uygulaması - 2024</p>
     </footer>
-<!-- Modal -->
-<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content bg-gray-800 text-white">
-      <div class="modal-header border-0">
-        <h5 class="modal-title">Onay</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <p>Parçayı geri dönüşüme yollamak istediğinize emin misiniz?</p>
-      </div>
-      <div class="modal-footer border-0">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hayır</button>
-        <button type="button" id="confirmDeleteButton" class="btn btn-danger">Evet</button>
+    <!-- Onay Modalı -->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content bg-gray-800 text-white">
+          <div class="modal-header border-0">
+            <h5 class="modal-title">Onay</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <p>Parçayı geri dönüşüme yollamak istediğinizden emin misiniz?</p>
+          </div>
+          <div class="modal-footer border-0">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hayır</button>
+            <button type="button" id="confirmDeleteButton" class="btn btn-danger">Evet</button>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</div>
 
-<!-- Notification -->
-<div id="notification" class="position-fixed bottom-0 end-0 p-3" style="z-index: 11; display: none;">
-  <div class="toast align-items-center text-white bg-gray-800 border-0" role="alert">
-    <div class="d-flex">
-      <div class="toast-body">
-        Parça başarıyla geri dönüştürüldü.
+    <!-- Notification -->
+    <div id="notification" class="position-fixed bottom-0 end-0 p-3" style="z-index: 11; display: none;">
+      <div class="toast align-items-center text-white bg-gray-800 border-0" role="alert">
+        <div class="d-flex">
+          <div class="toast-body"></div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
       </div>
-      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
     </div>
-  </div>
-</div>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-  let deletePartId = null;
 
-  $(document).ready(function () {
-    const csrftoken = '{{ csrf_token }}';
-
-    // Check for notification from login page
-    const message = localStorage.getItem('notificationMessage');
-    const type = localStorage.getItem('notificationType');
-
-    if (message && type) {
-      showNotification(message, type);
-      localStorage.removeItem('notificationMessage');
-      localStorage.removeItem('notificationType');
-    }
-
-    // Produce part button click handler
-    $('#producePartButton').click(function () {
-      const aircraftType = $('#aircraftType').val();
-
-      if (!aircraftType) {
-        showNotification('Bir uçak tipi seçin.', 'error'); // Hata mesajını notification olarak göster
-        return;
-      }
-
-      $.ajax({
-        url: '/api/produce-part/',
-        type: 'POST',
-        contentType: 'application/json',
-        headers: {
-          'X-CSRFToken': csrftoken,
-        },
-        data: JSON.stringify({ target_aircraft_type: aircraftType }),
-        success: function (response) {
-          if (response.success) {
-            showNotification('Parça başarıyla üretildi!', 'success'); // Başarı mesajını notification olarak göster
-
-            const newRow = `
-              <tr id="part-${response.id}" class="bg-gray-600 border-b border-gray-700">
-                <td>${response.part_type_display || 'Belirtilmedi'}</td>
-                <td>${response.target_aircraft_type_display || 'Belirtilmedi'}</td>
-                <td>${response.used_display || 'Hayır'}</td>
-                <td>${response.team_name || 'Belirtilmedi'}</td>
-                <td>${response.production_time || 'Belirtilmedi'}</td>
-                <td><button class="btn btn-danger" onclick="deletePart(${response.id})">Sil</button></td>
-              </tr>`;
-            $('table tbody').append(newRow);
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      $(document).ready(function () {
+        const csrftoken = '{{ csrf_token }}'
+        let deletePartId = null // Silinecek parçanın ID'si için global değişken
+        const notificationMessage = localStorage.getItem('notificationMessage');
+        const notificationType = localStorage.getItem('notificationType');
+        if (notificationMessage && notificationType) {
+          showNotification(notificationMessage, notificationType);
+          // Notification gösterildikten sonra localStorage'dan temizle
+          localStorage.removeItem('notificationMessage');
+          localStorage.removeItem('notificationType');
+        }
+        // Parça Üretme
+        $('#producePartButton').click(function () {
+          const aircraftType = $('#partAircraftType').val()
+      
+          if (!aircraftType) {
+            showNotification('Bir uçak tipi seçin.', 'error')
+            return
+          }
+      
+          $.ajax({
+            url: '/api/produce-part/',
+            type: 'POST',
+            contentType: 'application/json',
+            headers: {
+              'X-CSRFToken': csrftoken
+            },
+            data: JSON.stringify({ target_aircraft_type: aircraftType }),
+            success: function (response) {
+              if (response.success) {
+                showNotification(response.success, 'success')
+                location.reload()
+              } else {
+                showNotification(response.error || 'Bir hata oluştu.', 'error')
+              }
+            },
+            error: function () {
+              showNotification('Bir hata oluştu.', 'error')
+            }
+          })
+        })
+      
+        // Uçak Üretme
+        $('#produceAircraftButton').click(function () {
+          const aircraftType = $('#aircraftType').val()
+      
+          if (!aircraftType) {
+            showNotification('Bir uçak tipi seçin.', 'error')
+            return
+          }
+      
+          $.ajax({
+            url: '/api/produce-aircraft/',
+            type: 'POST',
+            contentType: 'application/json',
+            headers: {
+              'X-CSRFToken': csrftoken
+            },
+            data: JSON.stringify({ aircraft_type: aircraftType }), // Doğru formatı gönderiyoruz
+            success: function (response) {
+              if (response.success) {
+                showNotification(response.success, 'success')
+                location.reload()
+              } else if (response.error) {
+                // Eksik parçaları göster
+                showNotification(response.error, 'error')
+              }
+            },
+            error: function (xhr) {
+              // Backend'den gelen hata mesajını göster
+              const errorResponse = xhr.responseJSON
+              if (errorResponse && errorResponse.error) {
+                showNotification(errorResponse.error, 'error')
+              } else {
+                showNotification('Bir hata oluştu.', 'error')
+              }
+            }
+          })
+        })
+      
+        // Parça Silme: Onay Penceresi Gösterme
+        window.deletePart = function (partId) {
+          deletePartId = partId // Silinecek parçanın ID'sini kaydediyoruz
+          const modal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'))
+          modal.show() // Modal'ı aç
+        }
+      
+        // Modal'da "Evet" Butonuna Tıklayınca Silme İşlemini Gerçekleştir
+        $('#confirmDeleteButton').click(function () {
+          if (!deletePartId) return
+      
+          $.ajax({
+            url: '/api/recycle-part/',
+            type: 'POST', // POST metodunu kullanıyoruz
+            contentType: 'application/json',
+            headers: {
+              'X-CSRFToken': csrftoken // CSRF koruması için token
+            },
+            data: JSON.stringify({ part_id: deletePartId }), // Gerekli veriyi gönderiyoruz
+            success: function (response) {
+              if (response.success) {
+                showNotification(response.success, 'success') // Başarı mesajı
+                $(`#part-${deletePartId}`).remove() // Tablo satırını kaldır
+              } else {
+                showNotification(response.error || 'Bir hata oluştu.', 'error')
+              }
+              deletePartId = null // Silme işleminden sonra ID'yi temizle
+              $('#confirmDeleteModal').modal('hide') // Modal'ı kapat
+            },
+            error: function () {
+              showNotification('Parça silinemedi, bir hata oluştu.', 'error')
+              deletePartId = null // Hata durumunda ID'yi temizle
+              $('#confirmDeleteModal').modal('hide') // Modal'ı kapat
+            }
+          })
+        })
+      
+        // Notification Gösterme
+        function showNotification(message, type) {
+          const notification = $('#notification');
+          const toastElement = notification.find('.toast');
+    
+          if (type === 'success') {
+            toastElement.removeClass('bg-danger').addClass('bg-success');
           } else {
-            showNotification(response.error || 'Bir hata oluştu.', 'error');
+            toastElement.removeClass('bg-success').addClass('bg-danger');
           }
-        },
-        error: function () {
-          showNotification('Bir hata oluştu.', 'error'); // Hata durumunda notification göster
-        },
-      });
-    });
-  });
-
-  // deletePart fonksiyonu: Parçayı silme isteği
-function deletePart(partId) {
-  deletePartId = partId;
-  const modal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
-  modal.show();
-}
-
-// Silme onay butonuna tıklama
-document.getElementById('confirmDeleteButton').addEventListener('click', function () {
-  const csrftoken = '{{ csrf_token }}';
-
-  $.ajax({
-      url: '/api/recycle-part/',
-      type: 'POST',
-      contentType: 'application/json',
-      headers: {
-          'X-CSRFToken': csrftoken,
-      },
-      data: JSON.stringify({ part_id: deletePartId }),
-      success: function (response) {
-          if (response.success) {
-              // Silme başarılıysa
-              $(`#part-${deletePartId}`).remove();
-              showNotification(response.success, 'success');
-          } else if (response.error) {
-              // Backend'den gelen error mesajını göster
-              showNotification(response.error, 'error');
-          }
-      },
-      error: function (jqXHR) {
-          // Sunucu hata durumu (örneğin, 500 gibi)
-          const errorMessage = jqXHR.responseJSON && jqXHR.responseJSON.error 
-              ? jqXHR.responseJSON.error 
-              : 'Bir hata oluştu. Parça silinemedi.';
-          showNotification(errorMessage, 'error');
-      },
-  });
-
-  // Modal'ı kapatma
-  const modal = bootstrap.Modal.getInstance(document.getElementById('confirmDeleteModal'));
-  modal.hide();
-});
-
-
- // Notification gösterme
- function showNotification(message, type) {
-  const notification = document.getElementById('notification');
-  const toastElement = notification.querySelector('.toast');
-
-  if (!toastElement) {
-      console.error('Toast element bulunamadı.');
-      return;
-  }
-
-  // Notification arka plan rengini başarı ve hata durumlarına göre değiştir
-  if (type === 'success') {
-      toastElement.classList.remove('bg-danger');
-      toastElement.classList.add('bg-success');  // Başarı için yeşil
-  } else if (type === 'error') {
-      toastElement.classList.remove('bg-success');
-      toastElement.classList.add('bg-danger');  // Hata için kırmızı
-  }
-
-  notification.style.display = 'block';
-  toastElement.querySelector('.toast-body').textContent = message;
-
-  const toast = new bootstrap.Toast(toastElement);
-  toast.show();
-
-  // Notification'ı sadece hata durumunda otomatik kapat
-  if (type === 'error') {
-      setTimeout(() => {
-          notification.style.display = 'none';
-      }, 3000);
-  }
-}
-
-</script>
-
+    
+          notification.find('.toast-body').text(message);
+          notification.show();
+    
+          const toast = new bootstrap.Toast(toastElement[0]);
+          toast.show();
+    
+          setTimeout(() => {
+            notification.hide();
+          }, 3000);
+        }
+      })
+    </script>
   </body>
 </html>
 
@@ -296,5 +403,4 @@ document.getElementById('confirmDeleteButton').addEventListener('click', functio
   .toast-body {
     font-weight: bold; /* Daha dikkat çekici görünüm için */
   }
-  
 </style>

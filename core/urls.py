@@ -9,4 +9,5 @@ urlpatterns = [
     path('dashboard/', views.dashboard, name='dashboard'),
     path('api/produce-part/', views.produce_part, name='produce_part'),
     path('api/recycle-part/', views.recycle_part, name='recycle_part'),
+    
 ]

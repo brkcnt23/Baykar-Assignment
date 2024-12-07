@@ -18,15 +18,17 @@ from core.views import (
     dashboard,
     produce_part,
     recycle_part,
+    produce_aircraft,
 )
 
 
 
 router = DefaultRouter()
-router.register(r'parts', PartViewSet)
+router.register(r'aircraft', AircraftViewSet, basename='aircraft')
+router.register(r'parts', PartViewSet, basename='part')
+
 router.register(r'teams', TeamViewSet)
 router.register(r'employee', EmployeeViewSet)
-router.register(r'aircraft', AircraftViewSet)
 
 
 urlpatterns = [
@@ -37,4 +39,5 @@ urlpatterns = [
     path('dashboard/', dashboard, name='dashboard'),  # Dashboard için
     path('api/produce-part/', produce_part, name='produce_part'),
     path('api/recycle-part/', recycle_part, name='recycle_part'),
+    path('api/produce-aircraft/', produce_aircraft, name='produce_aircraft'),
 ]
