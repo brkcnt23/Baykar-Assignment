@@ -250,7 +250,7 @@ django-filter==24.3
 * Veritabanı Yönetimi
 <h1 align="center">
     <img
-      height="700"
+      height="500"
       width="800"
       src="/static/images/django-personel.png"
 </h1>
@@ -262,8 +262,8 @@ django-filter==24.3
 </h1>
 <h1 align="center">
     <img
-      height="800"
-      width="1000"
+      height="700"
+      width="1100"
       src="/static/images/django-parcalar.png"
 </h1>
 <h1 align="center">
