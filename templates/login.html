@@ -11,6 +11,7 @@
   </head>
   <body class="bg-blue-900 flex items-center justify-center min-h-screen">
     <div class="w-full max-w-md p-10" style="background-color: #121d54; border-radius: 1rem; box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);">
+      <img src="/static/images/aircraft-logo.png" alt="Aircraft Logo" class="mx-auto mb-4" style="width: 300px; height: 200px; object-fit: cover;" />
       <h2 class="text-4xl font-bold text-center text-white mb-6">Hava Aracı Üretim Uygulaması</h2>
       <h3 class="text-2xl font-semibold text-center text-white mb-6">Personel Girişi</h3>
       <form id="loginForm" class="space-y-6">
@@ -41,31 +42,31 @@
     <script>
       $(document).ready(function () {
         const showNotification = (message, type) => {
-          const notification = $('#notification');
-          const toast = notification.find('.toast');
-          const toastBody = toast.find('.toast-body');
-    
+          const notification = $('#notification')
+          const toast = notification.find('.toast')
+          const toastBody = toast.find('.toast-body')
+      
           if (type === 'success') {
-            toast.removeClass('bg-danger').addClass('bg-gray-800');
+            toast.removeClass('bg-danger').addClass('bg-gray-800')
           } else if (type === 'error') {
-            toast.removeClass('bg-gray-800').addClass('bg-danger');
+            toast.removeClass('bg-gray-800').addClass('bg-danger')
           }
-    
-          toastBody.text(message);
-          notification.show();
-          const bootstrapToast = new bootstrap.Toast(toast[0]);
-          bootstrapToast.show();
-        };
-    
+      
+          toastBody.text(message)
+          notification.show()
+          const bootstrapToast = new bootstrap.Toast(toast[0])
+          bootstrapToast.show()
+        }
+      
         const handleLogin = () => {
-          const username = $('#username').val();
-          const password = $('#password').val();
-    
+          const username = $('#username').val()
+          const password = $('#password').val()
+      
           if (!username || !password) {
-            showNotification('Lütfen kullanıcı adı ve parolanızı giriniz.', 'error');
-            return;
+            showNotification('Lütfen kullanıcı adı ve parolanızı giriniz.', 'error')
+            return
           }
-    
+      
           $.ajax({
             url: '/api/login',
             type: 'POST',
@@ -74,32 +75,29 @@
             success: function (response) {
               if (response.success) {
                 // Notification'ı localStorage'a kaydediyoruz
-                localStorage.setItem(
-                  'notificationMessage',
-                  `Giriş başarılı! "${username}" olarak giriş yaptınız.`
-                );
-                localStorage.setItem('notificationType', 'success');
-                window.location.href = '/dashboard/';
+                //giriş yapıldıktan sonra da bildirimi dashboard ekranında gösterebilmek için
+                localStorage.setItem('notificationMessage', `Giriş başarılı! "${username}" olarak giriş yaptınız.`)
+                localStorage.setItem('notificationType', 'success')
+                window.location.href = '/dashboard/'
               } else {
-                showNotification('Giriş başarısız! Kullanıcı adı veya parola hatalı.', 'error');
+                showNotification('Giriş başarısız! Kullanıcı adı veya parola hatalı.', 'error')
               }
             },
             error: function () {
-              showNotification('Giriş başarısız! Kullanıcı adı veya parola hatalı.', 'error');
-            },
-          });
-        };
-    
-        $('#loginButton').click(handleLogin);
-    
+              showNotification('Giriş başarısız! Kullanıcı adı veya parola hatalı.', 'error')
+            }
+          })
+        }
+      
+        $('#loginButton').click(handleLogin)
+      
         $('#loginForm').on('keydown', function (event) {
           if (event.key === 'Enter') {
-            event.preventDefault();
-            handleLogin();
+            event.preventDefault()
+            handleLogin()
           }
-        });
-      });
+        })
+      })
     </script>
-    
   </body>
 </html>

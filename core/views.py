@@ -10,7 +10,7 @@ from .permissions import IsTeamMember, IsMontajTeam
 
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from django.contrib.auth import authenticate, login
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -22,6 +22,14 @@ from rest_framework.decorators import api_view
 
 from .models import Part, AIRCRAFT_TYPE_CHOICES
 
+"""
+gerekli importlar oluşturuldu:
+rest framework'ten gelen viewsetleri, action, response, IsAuthenticated
+model dosyamızdan gelen takım, personel, hava aracı, parça bilgileri
+giriş işlemlerini kontrol etmesi için auth ve login
+web loop içerisinde gerekli sayfaların açılmasını sağlayan render
+jsonresponse döndürülebilmesini ve gerektiğinde django filters kullanılmasını sağlayan importlar...
+"""
 
 class TeamViewSet(viewsets.ModelViewSet):
     queryset = Team.objects.all()
@@ -61,11 +69,11 @@ class PartViewSet(viewsets.ModelViewSet):
         except Exception as e:
             return Response({"error": "Bir hata oluştu."}, status=status.HTTP_400_BAD_REQUEST)
 
-
+#login ekranı
 def login_page(request):
     return render(request, 'login.html')
 
-
+#dashboard ekranı
 @login_required
 def dashboard(request):
     user = request.user
@@ -137,7 +145,7 @@ def dashboard(request):
 
     return render(request, 'dashboard.html', context)
 
-
+#login auth
 @csrf_exempt
 def login_user(request):
     if request.method == 'POST':
@@ -155,7 +163,7 @@ def login_user(request):
             return JsonResponse({'success': False, 'error': str(e)})
     return JsonResponse({'success': False, 'error': 'Invalid request method'})
 
-
+#parça üretimi metodu
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def produce_part(request):
@@ -189,7 +197,7 @@ def produce_part(request):
     }, status=status.HTTP_201_CREATED)
 
 
-
+#hava aracı üretimi metodu
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def produce_aircraft(request):
@@ -205,6 +213,7 @@ def produce_aircraft(request):
     required_parts = ['KANAT', 'GOVDE', 'KUYRUK', 'AVIYONIK']
     missing_parts = []
 
+    #hava aracı üretimi için gerekli koşulların kontrolü
     for part_type in required_parts:
         count_needed = 2 if part_type == 'KANAT' else 1
         available_parts = Part.objects.filter(
@@ -213,7 +222,7 @@ def produce_aircraft(request):
             used=False,
             aircraft__isnull=True
         ).count()
-
+        #parça eksikliğinde bildirmek için kullanılan bölüm
         if available_parts < count_needed:
             missing_parts.append(
                 f"{count_needed - available_parts} adet {part_type}")
@@ -233,7 +242,7 @@ def produce_aircraft(request):
                 used=False,
                 aircraft__isnull=True
             )[:count_needed]
-
+            #hava aracı üretiminde parçaların "kullanıldı" döndürmesi
             for part in parts:
                 part.aircraft = new_aircraft
                 part.used = True
@@ -243,7 +252,7 @@ def produce_aircraft(request):
     except Exception as e:
         return Response({'error': f'Uçak üretiminde bir hata oluştu: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
+#geri dönüşüm metodu
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def recycle_part(request):

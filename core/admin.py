@@ -1,6 +1,10 @@
 from django.contrib import admin
 from .models import Team, Employee, Aircraft, Part
 
+"""
+Admin yönetimi için oluşturulan sınıf.
+"""
+
 @admin.register(Team)
 class TeamAdmin(admin.ModelAdmin):
     list_display = ('name', 'team_type')

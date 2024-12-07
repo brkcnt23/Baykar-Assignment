@@ -32,12 +32,12 @@ router.register(r'employee', EmployeeViewSet)
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),  # Admin paneline erişmek için bu satırı ekleyin
+    path('admin/', admin.site.urls),  # Admin paneline erişmek için gerekli url
     path('', include(router.urls)),
     path('login/', login_page, name='login'),  # Login sayfası için
     path('api/login', login_user, name='api_login'),  # Login işlemi için
     path('dashboard/', dashboard, name='dashboard'),  # Dashboard için
-    path('api/produce-part/', produce_part, name='produce_part'),
-    path('api/recycle-part/', recycle_part, name='recycle_part'),
-    path('api/produce-aircraft/', produce_aircraft, name='produce_aircraft'),
+    path('api/produce-part/', produce_part, name='produce_part'), # Parça üretimi için
+    path('api/recycle-part/', recycle_part, name='recycle_part'), # Geri dönüşüm için
+    path('api/produce-aircraft/', produce_aircraft, name='produce_aircraft'), # Hava aracı üretimi için
 ]

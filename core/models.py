@@ -1,20 +1,21 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+#parça tipleri
 PART_TYPE_CHOICES = [
     ('KANAT', 'Kanat'),
     ('GOVDE', 'Gövde'),
     ('KUYRUK', 'Kuyruk'),
     ('AVIYONIK', 'Aviyonik')
 ]
-
+#hava aracı tipleri
 AIRCRAFT_TYPE_CHOICES = [
     ('TB2', 'TB2'),
     ('TB3', 'TB3'),
     ('AKINCI', 'AKINCI'),
     ('KIZILELMA', 'KIZILELMA')
 ]
-
+#takım tipleri
 TEAM_TYPE_CHOICES = [
     ('KANAT_TAKIMI', 'Kanat Takımı'),
     ('GOVDE_TAKIMI', 'Gövde Takımı'),
@@ -22,7 +23,11 @@ TEAM_TYPE_CHOICES = [
     ('AVIYONIK_TAKIMI', 'Aviyonik Takımı'),
     ('MONTAJ_TAKIMI', 'Montaj Takımı')
 ]
-
+#
+"""
+Veritabanı için gerekli modelleri oluşturan sınıf
+Modellerin içerikler tiplerini oluşturduğumz yer.
+"""
 class Team(models.Model):
     name = models.CharField(max_length=50, unique=True)
     team_type = models.CharField(max_length=50, choices=TEAM_TYPE_CHOICES)

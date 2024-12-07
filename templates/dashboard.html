@@ -209,7 +209,7 @@
     <footer class="mt-auto text-gray-500">
       <p>Hava Aracı Üretim Uygulaması - 2024</p>
     </footer>
-    <!-- Onay Modalı -->
+    <!-- Onay Modal'ı -->
     <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content bg-gray-800 text-white">
@@ -243,9 +243,12 @@
     <script>
       $(document).ready(function () {
         const csrftoken = '{{ csrf_token }}'
+
         let deletePartId = null // Silinecek parçanın ID'si için global değişken
+
         const notificationMessage = localStorage.getItem('notificationMessage')
         const notificationType = localStorage.getItem('notificationType')
+
         if (notificationMessage && notificationType) {
           showNotification(notificationMessage, notificationType)
           // Notification gösterildikten sonra localStorage'dan temizle
@@ -260,7 +263,8 @@
             showNotification('Bir uçak tipi seçin.', 'error')
             return
           }
-      
+          
+          //parça üretimi için ajax ile POST gönderimi
           $.ajax({
             url: '/api/produce-part/',
             type: 'POST',
@@ -386,57 +390,56 @@
 
 <style>
   select {
-    color: white; /* Yazı rengi beyaz */
-    background-color: #071f45; /* Arka plan rengi */
-    border: 1px solid #4055bd; /* İsteğe bağlı: kenar rengi */
-    padding: 5px; /* İsteğe bağlı: kutu içi boşluk */
-    border-radius: 5px; /* İsteğe bağlı: köşeleri yuvarlatma */
+    color: white;
+    background-color: #071f45; 
+    border: 1px solid #4055bd; 
+    padding: 5px; 
+    border-radius: 5px;
   }
   option {
-    color: white; /* Yazı rengi beyaz */
-    background-color: #071f45; /* Seçenek arka plan rengi */
+    color: white;
+    background-color: #071f45;
   }
   table {
-    width: 100%; /* Tabloyu tam genişlikte yapar */
-    border-collapse: collapse; /* Kenarların birleşmesini sağlar */
+    width: 100%;
+    border-collapse: collapse; 
   }
   th,
   td {
-    text-align: center; /* Hücreleri ortalar */
-    padding: 12px; /* Hücre içi boşluk */
-    border: 1px solid #4055bd; /* Hücrelerin kenarlarına renk ekler */
+    text-align: center; 
+    padding: 12px;
+    border: 1px solid #4055bd;
   }
   
   th {
-    background-color: #4055bd; /* Başlık arka plan rengi */
-    color: white; /* Başlık yazı rengi */
-    font-weight: bold; /* Başlık yazı tipi kalın */
+    background-color: #4055bd;
+    color: white;
+    font-weight: bold;
   }
   
   td {
-    background-color: #1e293b; /* Hücre arka plan rengi */
-    color: white; /* Hücre yazı rengi */
+    background-color: #1e293b;
+    color: white;
   }
-  
   tr:nth-child(even) td {
-    background-color: #334155; /* Alternatif satır arka plan rengi */
+    background-color: #334155;
   }
   .modal-content.bg-gray-800 {
-    background-color: #1e293b !important; /* Modal için koyu bir arka plan */
-    color: white; /* Yazı rengini beyaz yapar */
+    background-color: #1e293b !important;
+    color: white;
   }
   
   .modal-footer.border-0,
   .modal-header.border-0 {
-    border: none !important; /* Modal çerçeve kenarlarını kaldırır */
+    border: none !important;
   }
   
   .toast.bg-gray-800 {
-    background-color: #1e293b !important; /* Notification arka plan rengi */
-    color: white !important; /* Notification yazı rengi */
+    background-color: #1e293b !important;
+    color: white !important;
   }
   
   .toast-body {
-    font-weight: bold; /* Daha dikkat çekici görünüm için */
+    font-weight: bold;
   }
 </style>

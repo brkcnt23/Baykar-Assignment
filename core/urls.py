@@ -1,8 +1,7 @@
 from django.urls import path
 from . import views
 
-
-
+#core içerisinde gerekli yönlendirmelerin yapıldığı sınıf
 urlpatterns = [
     path('login/', views.login_page, name='login'),
     path('api/login', views.login_user, name='api_login'),
